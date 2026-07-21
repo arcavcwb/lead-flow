@@ -27,9 +27,9 @@ Las sesiones de IA **nunca se hablan directamente** — el handoff es vía **Pla
 
 | ID Plane | Épica / Módulo | Descripción Corta | Estado | Cycle / Sprint |
 | --- | --- | --- | --- | --- |
-| **LEADFLOW-01** | Infraestructura | Configuración Git, vínculo a remoto, identidad y documentación | ⬜ Backlog | Cycle 0 |
-| **LEADFLOW-02** | Infraestructura | Setup Monorepo (pnpm workspaces) `apps/sdk` y `supabase/` | ⬜ Backlog | Cycle 0 |
-| **LEADFLOW-03** | Infraestructura | Reglas de Calidad (Prettier, ESLint, auto-check) | ⬜ Backlog | Cycle 0 |
+| **LEADFLOW-01** | Infraestructura | Configuración Git, vínculo a remoto, identidad y documentación | 🔄 En desarrollo | Cycle 0 |
+| **LEADFLOW-02** | Infraestructura | Setup Monorepo (pnpm workspaces) `apps/sdk` y `supabase/` | 🔄 En desarrollo | Cycle 0 |
+| **LEADFLOW-03** | Infraestructura | Reglas de Calidad (Prettier, ESLint) y CI (GitHub Actions) | 🔄 En desarrollo | Cycle 0 |
 | **LEADFLOW-04** | SDK Frontend | Scaffold SolidJS + Vite + Web Components (solid-element) | ⬜ Backlog | Cycle 2 |
 | **LEADFLOW-05** | Backend & Bóveda | Schema de base de datos (Supabase) + RLS + Edge stub | ⬜ Backlog | Cycle 1 |
 | **LEADFLOW-06** | Backend & Bóveda | Gatekeeper: CORS, Rate Limiting, Honeypot, Vault Insert | ⬜ Backlog | Cycle 1 |

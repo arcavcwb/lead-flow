@@ -24,13 +24,13 @@ Para que el Squad de IA (Antigravity) pueda interactuar de forma autónoma con l
   2. Crear la estructura de carpetas: `supabase/functions/` y `supabase/migrations/`.
   3. Ejecutar `npx supabase link --project-ref <REFERENCE_ID>`.
 
-### Paso 3: Configuración del Servidor MCP
+### Paso 3: Prioridad de Trazabilidad (CLI Local vs MCP)
 - **Actor:** Humano / IA
-- **Acción:** Asegurarnos de que el servidor MCP local de Supabase (`supabase-mcp`) tenga inyectado el Token de Acceso Personal (PAT) del usuario para que yo (la IA) pueda usar las herramientas `list_tables`, `execute_sql`, `deploy_edge_function` de forma autónoma sin depender de bash.
+- **Acción:** Por arquitectura y trazabilidad de Git, **no** utilizaremos el MCP para ejecutar `execute_sql` directamente en producción de forma anónima. Todas las migraciones deben escribirse como archivos locales en `supabase/migrations/` y aplicarse a través del CLI de Supabase (ej. `npx supabase db push`). El MCP de Supabase se puede usar **solo de lectura** (`list_tables`) para auditar que el CLI hizo su trabajo.
 
 ### Paso 4: Smoke Test (Prueba de Vida)
 - **Actor:** Tester (Flash)
-- **Acción:** Ejecutar una llamada al MCP tool `list_tables` para verificar que la IA puede leer la base de datos vacía. Si responde 200 OK, el puente está listo para el código.
+- **Acción:** Ejecutar el comando local de Supabase CLI para linkear el proyecto y verificar el estado. El puente estará listo cuando el CLI local pueda comunicarse con la base de datos remota sin errores.
 
 ---
 

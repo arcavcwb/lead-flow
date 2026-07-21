@@ -102,22 +102,21 @@ El sistema utiliza una **arquitectura orientada a eventos**, diseñada para resi
 **Tabla: `clients`**
 - `id` (UUID, PK)
 - `empresa_nombre` (Text)
-- `dominio_autorizado` (Text — para validación CORS)
 - `activo` (Boolean)
 
 **Tabla: `clients_config` (Config-Driven UI)**
 - `client_id` (UUID, FK → clients)
+- `allowed_domains` (Array de Text — para validación CORS)
 - `theme_color` (String, Hex)
-- `require_age` (Boolean)
-- `legal_disclaimer` (Text)
+- `logo_url` (Text, Opcional)
 - `webhook_n8n_url` (String, Encriptado)
 
 **Tabla: `leads_vault`**
 - `id` (UUID, PK)
 - `client_id` (UUID, FK → clients)
-- `payload` (JSONB — almacena nombre, teléfono y campos dinámicos)
+- `payload` (JSONB — almacena campos dinámicos sin requerir migraciones)
 - `created_at` (Timestamp)
-- `processed_by_n8n` (Boolean)
+- `status` (Text — 'new', 'processing', 'sent', 'failed')
 
 ---
 

@@ -24,7 +24,8 @@ Diseñar y aplicar el esquema de la base de datos en Supabase para soportar la c
 -- clients
 CREATE TABLE public.clients (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-  name text NOT NULL,
+  empresa_nombre text NOT NULL,
+  activo boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -32,18 +33,16 @@ CREATE TABLE public.clients (
 CREATE TABLE public.clients_config (
   client_id uuid REFERENCES public.clients(id) ON DELETE CASCADE PRIMARY KEY,
   allowed_domains text[] DEFAULT '{}'::text[],
-  primary_color text DEFAULT '#000000',
+  theme_color text DEFAULT '#000000',
   logo_url text,
-  webhook_waha_url text -- Endpoint interno hacia n8n/WAHA
+  webhook_n8n_url text -- Endpoint hacia el motor de automatización
 );
 
 -- leads_vault
 CREATE TABLE public.leads_vault (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   client_id uuid REFERENCES public.clients(id) ON DELETE CASCADE NOT NULL,
-  full_name text NOT NULL,
-  phone text NOT NULL,
-  email text,
+  payload jsonb NOT NULL, -- Flexibilidad absoluta para campos dinámicos
   status text DEFAULT 'new' CHECK (status IN ('new', 'processing', 'sent', 'failed')),
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
