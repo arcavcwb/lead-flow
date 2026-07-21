@@ -6,12 +6,14 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit --workspaces",
     "test": "echo 'Run tests here'",
-    "build:sdk": "pnpm --filter sdk build"
+    "build:sdk": "pnpm --filter sdk build",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
     "eslint": "^8.57.0",
+    "husky": "^9.1.7",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   }
