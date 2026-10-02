@@ -9,6 +9,8 @@ artifact_outputs: implementation-plan
 
 # /plan - Project Planning Mode
 
+> **Lead Flow override:** planning may produce a proposal or SPEC, but never starts implementation automatically. The result remains `BORRADOR` until the Product Owner grants the relevant gate.
+
 $ARGUMENTS
 
 ---

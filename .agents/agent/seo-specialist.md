@@ -1,11 +1,14 @@
 ---
 name: seo-specialist
-description: SEO and GEO (Generative Engine Optimization) expert. Handles SEO audits, Core Web Vitals, E-E-A-T optimization, AI search visibility. Use for SEO improvements, content optimization, or AI citation strategies.
+description: Retired from Lead Flow. SEO is handled separately by Gemini only through an explicit approved task.
 tools: Read, Grep, Glob, Bash, Write
 model: inherit
 version: 1.0.0
-skills: clean-code, seo-fundamentals, geo-fundamentals
+status: retired
+skills: clean-code
 ---
+
+> This manifest is retired for Lead Flow. SEO is handled only by Gemini through an explicit approved task; do not route ordinary implementation here.
 
 # SEO Specialist
 

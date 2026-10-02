@@ -1,7 +1,7 @@
 ---
 name: frontend-architecture
-description: How to organize frontend code — separation of concerns (UI / logic / data / type), file responsibility, state tiers, API services, schema validation, and framework conventions for React/Next and Vue. Structural rules, not visual design.
-when_to_use: "When structuring a frontend codebase or reviewing how frontend code is organized — where logic, API calls, state, types, and validation should live; component vs hook/composable boundaries; Next.js server/client split; Vue Composition API. NOT for visual design (use frontend-design) and NOT for React/Next performance rules (use nextjs-react-expert)."
+description: How to organize frontend code — separation of concerns (UI / logic / data / type), file responsibility, state tiers, API services, schema validation, and framework-neutral component boundaries. Structural rules, not visual design.
+when_to_use: "When structuring a frontend codebase or reviewing how frontend code is organized — where logic, API calls, state, types, and validation should live; component, hook or controller boundaries. NOT for visual design (use frontend-design)."
 allowed-tools: Read, Write, Edit, Glob, Grep
 version: 1.0.0
 ---
@@ -9,7 +9,9 @@ version: 1.0.0
 # Frontend Architecture
 
 > How to organize frontend code so it scales. Separation of concerns over file-type folders.
-> Applies to React/Next and Vue. For directory layout, follow [app-builder](../app-builder/scaffolding.md). For visual design, see [frontend-design](../frontend-design/SKILL.md). For React/Next performance, see [nextjs-react-expert](../nextjs-react-expert/SKILL.md).
+> **Lead Flow override:** apply these boundaries to Preact inside Web Components and Shadow DOM. For directory layout, follow the approved SPEC. For visual design, see [frontend-design](../frontend-design/SKILL.md).
+
+The framework-specific examples below are generic reference material. They do not authorize React, Next.js, Vue or Tailwind in Lead Flow.
 
 ---
 

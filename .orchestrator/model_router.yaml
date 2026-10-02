@@ -1,0 +1,7 @@
+# Entries are added only after tasks.json models are schema-validated.
+
+# ---- auto-added by `orch router add-missing` (review tiers) ----
+agy/gemini-3.8-flash-low:
+  backend: agy
+  cli_model: gemini-3.8-flash-low
+  tier: cheap

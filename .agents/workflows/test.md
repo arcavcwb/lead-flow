@@ -9,6 +9,8 @@ artifact_outputs: test-report
 
 # /test - Test Generation and Execution
 
+> **Lead Flow override:** generar o modificar tests también requiere una tarea aprobada, un agente/skill allowlisted y `allowed_paths`. Ejecutar un test read-only no autoriza cambiar código ni criterios.
+
 $ARGUMENTS
 
 ---

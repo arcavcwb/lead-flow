@@ -1,0 +1,29 @@
+concurrency:
+  global_max: 1
+  per_provider:
+    agy: 1
+
+state:
+  backend: sqlite
+
+budgets_config: budgets.yaml
+budgets_preset: conservative
+typical_dispatch_tokens: 200000
+
+report_findings:
+  enabled: false
+
+dispatch:
+  worktree_mode: true
+  base_branch: main
+  worktree_setup: ""
+
+vcs:
+  provider: github
+  auto_pr: false
+
+github:
+  auto_merge: false
+
+dashboard:
+  language: es

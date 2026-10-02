@@ -9,6 +9,8 @@ artifact_outputs: deployment-plan, deployment-report, rollback-plan
 
 # /deploy - Production Deployment
 
+> **Lead Flow override:** deployment is outside ordinary execution and requires GATE 2 for the exact remote mutation plus GATE 3 for release. Do not assume Vercel, run a provider CLI, or deploy from this generic workflow.
+
 $ARGUMENTS
 
 ---

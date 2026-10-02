@@ -1,12 +1,14 @@
 ---
 name: code-rules
-version: 1.0.0
-priority: P0
+version: 1.1.0
+priority: P1
 trigger: model_decision
-description: Apply when writing, building, refactoring, or fixing code — project-type agent routing, the Socratic Gate, Plan Mode phases, and the final checklist/scripts. Skip for pure questions or text-only responses.
+description: Legacy generic code rules. Lead Flow governance in lead-flow-governance.md is authoritative for this workspace.
 ---
 
 # Code Rules (TIER 1) - AG Kit
+
+> **Lead Flow override:** `.agents/rules/lead-flow-governance.md` and `AGENTS.md` are authoritative. The generic routing, stack names, agent counts and script references below are historical defaults and must not override the project contract.
 
 > Loaded when the request involves writing or modifying code.
 

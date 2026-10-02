@@ -9,6 +9,8 @@ artifact_outputs: task-graph, coordination-status, final-synthesis
 
 # Multi-Agent Orchestration
 
+> **Lead Flow override:** this generic workflow is retained for compatibility only. Lead Flow uses one approved task at a time through `orch`, with Gemini/Antigravity as executor and Codex as reviewer. Use `/lead-flow-execute` for implementation. Do not require three agents, parallelize writes, invoke a native Agent Tool, or bypass the task/gate contract.
+
 You are now in **ORCHESTRATION MODE**. Your task: coordinate specialized agents to solve this complex problem.
 
 ## Task to Orchestrate
@@ -16,16 +18,16 @@ $ARGUMENTS
 
 ---
 
-## 🔴 CRITICAL: Minimum Agent Requirement
+## Legacy Kit Requirement — Not Active for Lead Flow
 
-> ⚠️ **ORCHESTRATION = MINIMUM 3 DIFFERENT AGENTS**
-> 
-> If you use fewer than 3 agents, you are NOT orchestrating - you're just delegating.
+> ⚠️ The generic kit minimum-agent rule does not apply to Lead Flow.
+>
+> Lead Flow is intentionally operated by one Product Owner with one execution lane.
 > 
 > **Validation before completion:**
-> - Count invoked agents
-> - If `agent_count < 3` → STOP and invoke more agents
-> - Single agent = FAILURE of orchestration
+> - Count is informational only.
+> - Never create extra work merely to satisfy an agent count.
+> - A single assigned primary agent is valid when the matrix says so.
 
 ### Agent Selection Matrix
 

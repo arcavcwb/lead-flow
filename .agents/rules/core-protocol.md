@@ -1,11 +1,13 @@
 ---
 name: core-protocol
-version: 1.0.0
+version: 1.1.0
 priority: P0
 trigger: always_on
 ---
 
 # Core Protocol - AG Kit
+
+> **Lead Flow override:** the project contract in `AGENTS.md` and `.agents/rules/lead-flow-governance.md` defines the executor boundary. Do not assume Claude Code's native Agent Tool exists in Antigravity/Gemini; use the explicit task handoff instead.
 
 > The highest-priority workspace rules. How the AI loads agents/skills and what it must do before any implementation.
 
@@ -54,7 +56,7 @@ Agent activated → Check frontmatter "skills:" → Read SKILL.md (INDEX) → Re
 
 ## 🗺️ System Map & Memory Read
 
-> 🔴 **MANDATORY:** At session start, you MUST read `.agents/memory/MEMORY.md` to load persistent project conventions, user preferences, and decisions.
+> **When present:** At session start, read `.agents/memory/MEMORY.md` to load persistent project conventions, user preferences, and decisions. If it is absent, use `docs/STATE.md` and `AGENTS.md`; a missing optional memory file must not block a governed read-only session.
 
 > 📚 **Catalog lookup (on-demand, NOT every session):** Need the full list of Agents / Skills / Scripts? The `quick-reference` rule has the essentials. For the complete catalog, read `.agents/ARCHITECTURE.md` only when you actually need it (e.g. orchestration, or discovering a skill you're unsure exists) — do NOT load it on every request.
 

@@ -1,67 +1,166 @@
-# DOC 4: Go-To-Market y Estrategia Comercial (v1.0)
+# Go-to-market — Lead Flow v2.0
 
-## 1. El Posicionamiento (Framing Comercial)
+> Estado: **BORRADOR PARA GATE 0**
+> Etapa: descubrimiento y piloto. No hay autorización para publicar claims ni contactar prospectos desde este documento.
 
-No vendemos "Landing Pages" ni "Formularios". Vendemos **leads rescatados y velocidad de contacto**.
+## 1. Posicionamiento
 
-El mensaje de ventas se construye sobre el dolor real del Director Comercial: campañas de marketing que generan tráfico pero pierden prospectos por tiempos de respuesta lentos o formularios que no convierten.
+**Lead Flow ayuda a equipos que venden por WhatsApp a recibir cada prospecto con rapidez y trazabilidad, sin reemplazar su sitio actual.**
 
----
+La venta comienza por el problema comercial —tiempo de respuesta y leads invisibles— y demuestra la solución con datos. No se presentan detalles de Preact, Supabase, n8n o Evolution API como propuesta de valor principal.
 
-## 2. Táctica de Outbound (Prospección B2B)
+## 2. ICP inicial
 
-### Mensaje de Apertura para Directores Comerciales / CEOs:
+Prioridad:
 
-> *"Noté que sus campañas dirigen tráfico a un sitio que tarda 4.2s en cargar en móvil (pierden 40% del tráfico antes de ver la oferta). Además, probé llenar su formulario y nadie me contactó en la primera hora.*
->
-> *Implementamos infraestructuras para [Sector] que capturan en 0.5s y alertan a ventas en 5 segundos. ¿Tienen 15 minutos el martes?"*
+- Empresa con campañas activas y formularios web.
+- Venta consultiva o de ticket suficiente para valorar cada lead.
+- WhatsApp ya forma parte de la atención.
+- Director comercial/propietario accesible.
+- Sitio WordPress, HTML o stack compatible.
+- Disposición a medir tiempo de respuesta antes y después.
 
-### Por qué funciona:
-- **Dato concreto** de velocidad (que el equipo puede medir con Lighthouse)
-- **Prueba social implícita** (mostramos que probamos su producto antes de contactar)
-- **Propuesta de valor cuantificada** (5 segundos, no "rápido")
-- **CTA de baja fricción** (15 min, no una demo de 1 hora)
+No priorizar inicialmente:
 
----
+- Mensajería masiva o listas compradas.
+- Sectores con datos sensibles sin revisión especializada.
+- Clientes que exijan SLA alto antes del piloto.
+- Casos que dependan de automatización conversacional compleja.
 
-## 3. El Demostrador en Vivo — "El Simulador de Velocidad"
+## 3. Reglas de claims
 
-La herramienta de cierre de ventas definitiva: una landing page propia con el "Simulador de Latencia en Tiempo Real".
+### Permitido
 
-### Flujo:
-1. El prospecto B2B ingresa su **número de teléfono** en el simulador.
-2. El SDK procesa el dato → Edge Function → n8n → WAHA (WhatsApp HTTP API) → WhatsApp.
-3. El prospecto recibe un **mensaje de WhatsApp antes de terminar de scrollear la página**.
-4. Venta cerrada. El producto se vendió solo.
+- Datos medidos para ese prospecto, con fecha, herramienta y condiciones.
+- Objetivos identificados como objetivos.
+- Resultados agregados de pilotos con muestra y periodo.
+- Limitaciones del proveedor y del entorno.
 
-> **"Mide nuestra latencia en tiempo real."** — El titular es la demo.
+### Prohibido
 
-### Por qué es poderoso:
-- Es irrefutable. No hay presentación de PowerPoint. El producto habla.
-- El lead queda registrado en nuestra base de datos (el simulador es también nuestro propio motor de captura).
+- “Tenemos 50 clientes” sin evidencia real.
+- “99.9% garantizado” sin contrato, monitoreo e historial.
+- “Nunca se pierde un lead” sin prueba de recuperación y límites definidos.
+- “Reduce 40% el abandono” sin fuente aplicable.
+- “Misma infraestructura de grandes retailers” sin caso verificable.
+- Simular que se probó un formulario o campaña cuando no ocurrió.
 
----
+## 4. Descubrimiento antes de vender
 
-## 4. Matriz de Manejo de Objeciones
+Registrar respuestas, no inferencias:
 
-| Objeción | Respuesta Táctica |
-| :--- | :--- |
-| **"Ya usamos WordPress / Elementor"** | *"Perfecto. No tocaremos tu web. Generaremos un script de 1 línea para inyectar nuestro Motor de Captura. Tu equipo de TI ni lo notará."* |
-| **"¿Por qué el mantenimiento es tan caro?"** | *"No estás pagando hosting. Estás pagando la API de mensajería prioritaria, el motor lógico de enrutamiento 24/7 y la base de datos encriptada. ¿Cuánto te cuesta perder 5 leads calificados al mes por demoras del sistema actual?"* |
-| **"¿Cómo sé que es escalable?"** | *"Esta arquitectura (Edge Functions + VPS Docker) es la misma base que soporta picos masivos de tráfico en campañas de grandes clientes de retail. Tenemos el mismo VPS corriendo 50 clientes en este momento."* |
-| **"¿Y si WhatsApp falla?"** | *"El lead siempre queda guardado en nuestra base de datos primero. Aunque WhatsApp falle, la data nunca se pierde y el sistema reintenta automáticamente. Tu equipo de ventas también recibe el respaldo en Google Sheets."* |
+1. ¿De dónde llegan hoy los leads?
+2. ¿Quién los ve primero y cuánto tarda?
+3. ¿Cuántos se pierden o quedan sin respuesta?
+4. ¿Qué canal usa ventas realmente?
+5. ¿Quién controla la web y cuánto tarda un cambio?
+6. ¿Qué datos pide el formulario y por qué?
+7. ¿Qué consentimiento y política de privacidad existen?
+8. ¿Qué volumen máximo genera una campaña?
+9. ¿Qué costo tiene un lead y una venta?
+10. ¿Qué falla sería inaceptable?
 
----
+## 5. Oferta de piloto
 
-## 5. Proceso de Onboarding y Time-to-Market
+El piloto debe tener límites explícitos:
 
-### Tier 1 (< 24 horas)
-1. Alta del cliente en tabla `clients` y `clients_config` (Supabase Studio).
-2. Generación del snippet `<script>` con el `clientId`.
-3. El cliente pega el script en su web. Operativo.
+- Un sitio y un formulario.
+- Un equipo/ruta de notificación.
+- Duración y volumen definidos.
+- Datos mínimos.
+- Proveedor de mensajería y riesgo informados.
+- Métricas acordadas antes de empezar.
+- Responsable del cliente.
+- Precio piloto o compromiso de compra condicionado a resultados.
 
-### Tier 2 (< 5 días hábiles)
-1. Día 1-2: Diseño y desarrollo de Landing Page en Astro.
-2. Día 2-3: Configuración del flow n8n + WAHA (WhatsApp HTTP API) + Dead Letter Queue.
-3. Día 4: QA completo (aislamiento CSS, stress test, fallback test).
-4. Día 5: Deploy y entrega al cliente con métricas de latencia.
+### Métricas del piloto
+
+- Capturas iniciadas, válidas y rechazadas.
+- Leads persistidos.
+- Alertas aceptadas/fallidas/reintentadas.
+- Latencia p50/p95/p99.
+- Tiempo humano de onboarding y soporte.
+- Tiempo de primera respuesta comercial, si el cliente lo comparte.
+- Conversión posterior, si puede medirse legalmente.
+
+## 6. Demo de velocidad
+
+La demo puede pedir el teléfono del visitante únicamente si:
+
+- Explica que enviará un mensaje de prueba.
+- Muestra finalidad, responsable y enlace de privacidad.
+- Registra la aceptación requerida.
+- No reutiliza el número para marketing no informado.
+- Permite eliminar el dato según la política.
+- Usa datos de latencia reales del evento, no una animación simulada.
+
+La pantalla debe distinguir:
+
+```text
+Guardado: sí/no
+Proveedor aceptó: sí/no
+Tiempo observado: N ms
+```
+
+## 7. Mensaje outbound honesto
+
+Plantilla adaptable, solo con mediciones reales:
+
+> Revisé la experiencia móvil de `[sitio]` el `[fecha]`. Observé `[dato verificable]`. Lead Flow instala un flujo que guarda cada solicitud y mide cuánto tarda en llegar al equipo comercial. Estamos abriendo un piloto limitado para empresas que venden por WhatsApp. ¿Tiene sentido revisar durante 15 minutos cómo reciben hoy sus leads?
+
+No enviar formularios reales de terceros como “prueba” sin autorización. Para auditar velocidad se prefieren herramientas no invasivas y datos públicos.
+
+## 8. Funnel inicial
+
+```text
+20 conversaciones de descubrimiento
+        ↓
+5 diagnósticos con datos
+        ↓
+2 propuestas de piloto
+        ↓
+1 piloto activo
+        ↓
+decisión basada en evidencia
+```
+
+Los números son un objetivo operativo inicial, no una tasa de conversión esperada.
+
+## 9. Pruebas de precio
+
+Probar un precio completo, no “¿cuánto pagarías?”:
+
+- Setup definido.
+- MRR definido.
+- Qué incluye y qué queda fuera.
+- Límite de formularios, sitios, volumen y soporte.
+- Proveedor de mensajería incluido o trasladado.
+- Tratamiento de sobrecostos.
+
+Registrar aceptación, objeción concreta y alternativa solicitada. No reducir precio sin identificar qué alcance se elimina.
+
+## 10. Onboarding piloto
+
+1. Confirmar responsables, finalidad y datos.
+2. Aprobar proveedor de mensajería y riesgo.
+3. Configurar staging con datos sintéticos.
+4. Instalar el snippet en una página controlada.
+5. Ejecutar pruebas de captura, fallo y recuperación.
+6. Aprobar privacidad y copy del formulario.
+7. Obtener `GATE 2` para producción.
+8. Activar volumen limitado y observar.
+9. Entregar reporte del piloto y decisión.
+
+“24 horas” es un objetivo a medir desde que todas las dependencias del cliente están disponibles; no empieza antes de recibir accesos, textos y aprobación.
+
+## 11. Evidencia comercial
+
+| Nivel | Evidencia | Claim permitido |
+| --- | --- | --- |
+| 0 | Documento/arquitectura | “Estamos desarrollando” |
+| 1 | Demo controlada | “En esta prueba observamos…” |
+| 2 | Piloto real | “En este piloto y periodo…” |
+| 3 | Varios pilotos comparables | Resultado agregado con muestra |
+| 4 | Operación estable | SLA contractual dentro de condiciones |
+
+Cada material comercial debe indicar el nivel real. Gemini no puede elevarlo por inferencia.

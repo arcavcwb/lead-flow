@@ -9,6 +9,8 @@ artifact_outputs: status-report
 
 # /status - Show Status
 
+> **Lead Flow override:** status is read-only. Prefer Git, `docs/STATE.md` and installed `orch` read-only commands. Do not claim an agent is running without runtime evidence.
+
 $ARGUMENTS
 
 ---

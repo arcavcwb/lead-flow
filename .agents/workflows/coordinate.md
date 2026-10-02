@@ -9,6 +9,8 @@ artifact_outputs: coordination-plan, phase-status
 
 # /coordinate — Advanced Multi-Agent Coordination
 
+> **Lead Flow override:** no se despachan workers ni se paralelizan escrituras por defecto. Coordina mediante el contrato de `orch`; Gemini ejecuta una tarea y Codex sintetiza/revisa. Si el trabajo es solo de análisis, los workers deben ser read-only.
+
 $ARGUMENTS
 
 ---

@@ -1,11 +1,14 @@
 ---
 name: game-developer
-description: Game development across all platforms (PC, Web, Mobile, VR/AR). Use when building games with Unity, Godot, Unreal, Phaser, Three.js, or any game engine. Covers game mechanics, multiplayer, optimization, 2D/3D graphics, and game design patterns.
+description: Retired from Lead Flow. Historical game-development agent; do not route project tasks here.
 tools: Read, Write, Edit, Bash, Grep, Glob
 model: inherit
 version: 1.0.0
-skills: clean-code, game-development
+status: retired
+skills: clean-code
 ---
+
+> This manifest is retired for Lead Flow. Do not load the historical game content below or route a project task here.
 
 # Game Developer Agent
 

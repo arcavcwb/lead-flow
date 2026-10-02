@@ -9,6 +9,8 @@ artifact_outputs: preview-status, runtime-findings
 
 # /preview - Preview Management
 
+> **Lead Flow override:** preview is allowed only for an approved task whose SPEC defines the local command. Do not assume Next.js or port 3000; report environment constraints without changing infrastructure.
+
 $ARGUMENTS
 
 ---
@@ -83,4 +85,3 @@ python .agents/scripts/auto_preview.py start [port]
 python .agents/scripts/auto_preview.py stop
 python .agents/scripts/auto_preview.py status
 ```
-

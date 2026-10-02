@@ -9,6 +9,8 @@ artifact_outputs: verification-report
 
 # /verify — Prove Code Works
 
+> **Lead Flow override:** verifica el SHA y SPEC de una tarea concreta; no declares `done`, no hagas merge y no ejecutes mutaciones remotas desde este workflow.
+
 $ARGUMENTS
 
 ---

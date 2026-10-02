@@ -9,6 +9,8 @@ artifact_outputs: implementation-plan, changed-files, verification-report
 
 # /create - Create Application
 
+> **Lead Flow override:** do not use this generic scaffold workflow for the current repository. Lead Flow is not being initialized. Use `docs/ORCH-SETUP.md` and `/lead-flow-execute` only after the corresponding gate is approved.
+
 $ARGUMENTS
 
 ---

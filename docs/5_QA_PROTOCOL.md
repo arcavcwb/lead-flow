@@ -1,95 +1,267 @@
-# DOC 5: Protocolo de Aseguramiento de Calidad (QA) (v1.0)
+# Protocolo de calidad — Lead Flow v2.0
 
-Antes de cualquier despliegue a producción, el sistema **debe superar los 4 escenarios críticos** descritos a continuación. Ninguno es opcional.
+> Estado: **BORRADOR PARA GATE 0**
+> Regla: una salida verde solo vale si el comando ejecutó pruebas reales sobre el alcance del ticket y quedó vinculada al commit revisado.
 
----
+## 1. Principios
 
-## 1. Testing de Frontend — Aislamiento CSS
+1. Cada criterio de aceptación tiene al menos una prueba o una evidencia manual justificada.
+2. Los casos negativos son obligatorios para seguridad y resiliencia.
+3. CI no puede ignorar workspaces ausentes ni sustituir pruebas por `echo`.
+4. Los datos de prueba son sintéticos salvo autorización explícita.
+5. Staging y producción requieren credenciales y evidencias separadas.
+6. Una compilación exitosa no demuestra comportamiento, seguridad ni composición visual.
+7. Las pruebas destructivas solo se ejecutan en local o staging desechable aprobado.
 
-**Objetivo:** Garantizar que el Shadow DOM sea inmune a cualquier CSS externo.
+## 2. Contrato del quality gate
 
-### Procedimiento:
-1. Inyectar el SDK compilado en una página que contenga simultáneamente:
-   - Bootstrap 5 (con su reset CSS global)
-   - Tailwind CSS (con `@layer base`)
-   - CSS nativo con reglas `!important` conflictivas
-2. Inspeccionar visualmente cada elemento del formulario.
+`LEADFLOW-03` debe convertir estos nombres en comandos reales y reproducibles:
 
-### Criterios de Aceptación (Definition of Done):
-- [ ] Ningún `<input>` modifica su `font-size`, `padding` o `border` por estilos externos.
-- [ ] El `<button type="submit">` mantiene su diseño White-Label exacto.
-- [ ] No hay filtración de variables CSS del host hacia el Shadow Root.
-- [ ] `font-size` de todos los inputs es **≥ 16px** (anti-zoom iOS Safari).
-- [ ] `min-height` del botón submit es **≥ 48px**.
-- [ ] `type="tel"` + `inputMode="numeric"` abren teclado numérico en iOS y Android.
+| Gate | Obligación |
+| --- | --- |
+| Formato/lint | Analiza todos los archivos aplicables y sale distinto de cero ante errores |
+| Typecheck | Ejecuta el compilador de cada workspace TypeScript existente |
+| Unit tests | Ejecuta suites reales; falla si no encuentra las suites obligatorias del ticket |
+| Build | Construye artefactos reales; falla si el paquete objetivo no existe |
+| Database tests | Recrea Supabase local desde cero y prueba grants/RLS |
+| Free-tier readiness | Confirma inventario, presupuesto de datos, alerta de cuota y retención antes de datos reales |
+| E2E | Ejecuta flujos del widget contra servicios locales/staging controlado |
+| Security checks | Comprueba acceso público, secretos y aislamiento multi-tenant |
 
----
+El contrato final puede usar comandos como `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build` y `supabase db reset`, pero el SPEC de `LEADFLOW-03` debe comprobar primero la CLI instalada y definirlos según la estructura real. No se adivinan flags.
 
-## 2. Testing de Seguridad — Penetration Test Básico
+### Prueba anti-falso-verde
 
-**Objetivo:** Verificar que la superficie de ataque esté cerrada a nivel de Base de Datos y Edge Function.
+CI debe tener pruebas que demuestren:
 
-### 2.1. Bypass de RLS (Row Level Security)
-- **Herramienta:** Postman / cURL
-- **Acción:** Intentar insertar un registro directamente en `leads_vault` usando la `anon_key` pública de Supabase sin pasar por la Edge Function.
-- **Resultado Exigido:** `HTTP 401` o `HTTP 403`. Inserción bloqueada.
+- Un error TypeScript hace fallar typecheck.
+- Un error de lint hace fallar lint.
+- Eliminar/renombrar el workspace SDK hace fallar su build.
+- Una suite obligatoria ausente hace fallar tests.
+- Un comando que solo imprime texto no satisface el gate.
 
-### 2.2. Falsificación de CORS (Domain Spoofing)
-- **Acción:** Invocar la Edge Function con un header `Origin` de un dominio no registrado en la tabla `clients`.
-- **Resultado Exigido:** Bloqueo CORS. La Edge Function retorna `HTTP 403` y no procesa el payload.
+## 3. Matriz de verificación por ticket
 
-### 2.3. Ataque de Bots (Honeypot)
-- **Acción:** Enviar un formulario con el campo honeypot (invisible para humanos) completado.
-- **Resultado Exigido:** La Edge Function descarta el request silenciosamente (`HTTP 200` para no revelar el mecanismo) pero no inserta nada en `leads_vault`.
+| Tipo de cambio | Verificación mínima |
+| --- | --- |
+| Documentación/gobernanza | Enlaces internos, estados, IDs, contradicciones y diff |
+| Tooling/CI | Prueba positiva + prueba deliberadamente fallida |
+| Migración SQL | Reset local, test de constraints, grants, RLS y advisors |
+| Edge Function | Unit/integration, errores, límites, CORS y logs sin PII |
+| Outbox/worker | Idempotencia, concurrencia, retry, lock recovery y dead letter |
+| SDK | Unit, build, tamaño, Shadow DOM, accesibilidad y hosts de prueba |
+| Proveedor | Contract tests y staging; no enviar a números reales sin GATE 2 |
+| Deploy | Smoke test, métricas, rollback y revisión de secretos |
 
-### 2.4. Rate Limiting por IP
-- **Acción:** Enviar > X requests desde la misma IP en menos de 60 segundos.
-- **Resultado Exigido:** Las requests que superen el límite son bloqueadas con `HTTP 429 Too Many Requests`.
+## 4. Escenarios críticos del MVP
 
----
+### 4.1 Configuración pública mínima
 
-## 3. Testing de Carga y Resiliencia — Stress Test
+```gherkin
+Escenario: El widget obtiene solo configuración pública
+  Dado un cliente activo y un origen permitido
+  Cuando solicita su configuración
+  Entonces recibe campos, tema, textos, versión y privacidad
+  Y no recibe webhooks, claves, proveedor ni configuración privada
+```
 
-**Objetivo:** Verificar estabilidad bajo condiciones de pico de tráfico (campaña exitosa).
+```gherkin
+Escenario: Un origen no permitido consulta configuración
+  Dado un client_id válido desde un origen no registrado
+  Cuando solicita configuración
+  Entonces la respuesta no revela configuración operativa
+  Y el evento queda registrado sin PII
+```
 
-### Procedimiento:
-- Enviar **100 solicitudes simultáneas** a la Edge Function desde un script de carga (ej. `k6` o `artillery`).
+### 4.2 Captura y persistencia atómica
 
-### Criterios de Aceptación:
-- [ ] Supabase Edge Function responde a todas las requests sin errores `5xx`.
-- [ ] Los 100 registros aparecen en `leads_vault`.
-- [ ] n8n encola los webhooks sin colapsar (modo webhook-only aguanta la carga).
-- [ ] WAHA (WhatsApp HTTP API) mantiene la cadencia de envío sin que WhatsApp detecte spam (ajustar delays en n8n si p99 > umbral).
+```gherkin
+Escenario: Una captura válida queda durable
+  Dado un payload válido con consentimiento e idempotency key nueva
+  Cuando se invoca capture
+  Entonces existe exactamente un lead
+  Y existe exactamente un evento pending asociado
+  Y la respuesta incluye lead_id y correlation_id
+```
 
----
+```gherkin
+Escenario: No se responde éxito ante escritura parcial
+  Dado un fallo al crear el evento de entrega
+  Cuando se intenta capturar un lead
+  Entonces no queda un lead huérfano
+  Y la API no responde accepted
+```
 
-## 4. Fallback Test — Caída Crítica de WAHA (WhatsApp HTTP API)
+### 4.3 Idempotencia
 
-**Objetivo:** Verificar que una caída del servicio de mensajería NO causa pérdida de datos ni mala experiencia al usuario.
+```gherkin
+Escenario: Un retry del navegador no duplica
+  Dado un lead ya aceptado para una idempotency key
+  Cuando se repite la solicitud equivalente
+  Entonces se devuelve el resultado original
+  Y no se crea otro lead ni otro evento
+```
 
-### Procedimiento:
-1. Apagar deliberadamente el contenedor de Docker de WAHA (WhatsApp HTTP API) en el VPS.
-2. Realizar un envío de lead desde el formulario.
+### 4.4 Seguridad de base de datos
 
-### Resultados Exigidos (todos deben cumplirse):
-- [ ] **Supabase:** El lead está guardado correctamente en `leads_vault`. `processed_by_n8n = false`.
-- [ ] **UX del Usuario Final:** El SDK muestra el mensaje de éxito ("Gracias por registrarse"). El usuario no ve ningún error de servidor.
-- [ ] **n8n:** El Catch Node registra el error internamente con timestamp y detalles.
-- [ ] **Reintento Automático (DLQ):** n8n tiene programado un reintento a los 2, 5 y 15 minutos.
-- [ ] **Respaldo:** El lead llega a Google Sheets independientemente del fallo de WhatsApp.
+```gherkin
+Escenario: Anon no accede a tablas internas
+  Dado un cliente con publishable key
+  Cuando intenta SELECT o INSERT directo en clients, leads o delivery_outbox
+  Entonces Postgres/Data API rechaza la operación
+```
 
----
+```gherkin
+Escenario: No hay lectura cruzada
+  Dado datos de dos tenants
+  Cuando un contexto limitado al tenant A consulta datos
+  Entonces ninguna fila del tenant B es visible o modificable
+```
 
-## 5. Checklist de Pre-Deploy (Gate de Producción)
+Las pruebas deben distinguir permisos de objeto (`GRANT/REVOKE`) de políticas de fila (RLS).
 
-| Check | Estado |
-| :--- | :--- |
-| Lint & Type Check (`npm run lint && tsc --noEmit`) | ☐ |
-| Bundle Size < 50kb (Gzip) verificado con `vite-bundle-analyzer` | ☐ |
-| TTI < 200ms en simulación 4G (Lighthouse) | ☐ |
-| Aislamiento CSS ✓ (Escenario 1 superado) | ☐ |
-| RLS + CORS Pen Test ✓ (Escenario 2 superado) | ☐ |
-| Stress Test 100 reqs ✓ (Escenario 3 superado) | ☐ |
-| Fallback Test ✓ (Escenario 4 superado) | ☐ |
-| Variables de entorno en producción configuradas (no `.env` expuesto) | ☐ |
-| RLS de Supabase en producción (no en modo `service_role` abierto) | ☐ |
+### 4.5 Fallo y recuperación del proveedor
+
+```gherkin
+Escenario: La mensajería está caída
+  Dado un evento pending y un proveedor no disponible
+  Cuando el dispatcher intenta entregarlo
+  Entonces el lead permanece persistido
+  Y el evento pasa a retry_scheduled con error sanitizado
+  Y el prospecto no recibe un error posterior al accepted original
+```
+
+```gherkin
+Escenario: El proveedor se recupera
+  Dado un evento retry_scheduled cuyo next_attempt_at venció
+  Cuando el worker lo reprocesa
+  Entonces el proveedor lo acepta una sola vez
+  Y el evento queda accepted con timestamps y provider_message_id cuando exista
+```
+
+```gherkin
+Escenario: Un worker muere con un lock
+  Dado un evento processing con lock vencido
+  Cuando otro worker ejecuta recuperación
+  Entonces el evento vuelve a ser reclamable sin crear otra obligación
+```
+
+### 4.6 Rate limiting y bots
+
+- Honeypot lleno: no crea lead; la respuesta pública no explica la heurística.
+- Payload por encima del límite: `413` o código definido; cero escrituras.
+- JSON inválido/campos inesperados: `400/422`; cero escrituras.
+- Exceso por clave/IP: `429`; no depende de memoria local del isolate.
+- `Origin` falsificado: no se considera autenticación suficiente.
+- Headers de proxy: solo se confían desde infraestructura conocida.
+
+### 4.7 Privacidad
+
+- Consentimiento requerido cuando el diseño aprobado lo exija.
+- Se persisten versión, fecha y fuente del consentimiento.
+- Logs y traces no contienen teléfono/email completos.
+- Exportación localiza únicamente el titular correcto.
+- Eliminación o anonimización respeta dependencias y queda auditada.
+- Retención elimina/anomiza registros vencidos en entorno de prueba.
+
+### 4.8 SDK y aislamiento
+
+Probar en fixtures controladas con:
+
+- Bootstrap/reset global.
+- Tailwind preflight.
+- Selectores universales y `!important` del host.
+- Dos instancias del widget en la misma página.
+- Carga tardía y repetida del script.
+- CSP documentada del host.
+- Navegación por teclado y lector de pantalla básico.
+- Input de teléfono móvil y errores asociados por `aria-describedby`.
+- Zoom, viewport estrecho y texto ampliado.
+
+La frase correcta es “aislamiento probado contra la matriz soportada”, no “inmunidad absoluta”. CSS heredable, custom properties y decisiones del host deben considerarse explícitamente.
+
+## 5. Rendimiento
+
+### Bundle
+
+- Medir artefacto de producción minificado.
+- Reportar tamaño raw, gzip y Brotli.
+- Fallar CI si el presupuesto aprobado se supera.
+- Registrar qué incluye y excluye el artefacto.
+
+### Latencia
+
+Definiciones:
+
+```text
+capture_latency = response_sent_at - submission_received_at
+provider_latency = provider_accepted_at - submission_received_at
+recovery_latency = accepted_after_recovery_at - provider_outage_started_at
+```
+
+Reportar p50, p95, p99, tamaño de muestra, región, entorno, proveedor y periodo. No usar una única medición como garantía.
+
+### Carga
+
+La prueba inicial usa perfiles progresivos, no solo “100 requests simultáneas”:
+
+1. Baseline secuencial.
+2. Burst corto de captura.
+3. Carga sostenida esperada del piloto.
+4. Proveedor lento/caído mientras siguen entrando leads.
+5. Recuperación del backlog.
+
+Los límites y volúmenes se fijan en el SPEC con base en el piloto previsto.
+
+## 6. Seguridad operacional
+
+Antes de staging o producción:
+
+- Escanear archivos versionados por patrones de secretos.
+- Confirmar que `.env`, CSV de credenciales y archivos de sesión no están trackeados.
+- Revisar grants efectivos y políticas RLS.
+- Ejecutar asesores de Supabase disponibles para la versión instalada.
+- Verificar que Evolution API/n8n no estén expuestos directamente a internet sin controles aprobados, y que ningún secreto llegue al browser o a los logs.
+- Confirmar TLS, firewall, backups, restore y rotación de claves.
+- Probar rollback sin destruir datos remotos.
+
+## 7. Evidencia obligatoria de entrega
+
+El comentario de handoff incluye:
+
+```markdown
+Commit probado: <sha>
+Entorno: local | staging
+SPEC: docs/SPEC-LEADFLOW-XX.md @ <versión>
+
+Comandos ejecutados:
+- <comando> → PASS/FAIL, N tests
+
+Gherkin:
+- [x] <escenario> → <archivo/test>
+
+Métricas:
+- <métrica, muestra, resultado>
+
+Riesgos/exclusiones:
+- <pendiente explícito>
+```
+
+No pegar tokens, URLs con credenciales, payloads reales ni salidas que los contengan.
+
+## 8. Gate de release
+
+Un ticket no pasa a `En revisión` hasta que:
+
+- Todos sus criterios tienen evidencia.
+- El SHA probado coincide con el SHA entregado.
+- CI ejecutó gates reales.
+- No hay cambios no explicados dentro del alcance.
+- El diff no contiene secretos ni PII.
+- La documentación afectada fue actualizada.
+- Existe plan de rollback cuando cambia estado remoto.
+- Las excepciones están aprobadas; no se ocultan como “warning”.
+
+Producción requiere además `GATE 2` y smoke test posterior. El merge por sí solo no autoriza deploy.
+
+En un proyecto Supabase Free, el smoke test incluye verificar el plan/estado observados, tamaño de base de datos, egress y uso de funciones sin publicar secretos. Una cuota cercana, estado read-only o proyecto pausado bloquea el piloto hasta decisión humana.

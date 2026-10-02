@@ -1,11 +1,13 @@
 ---
 name: request-routing
-version: 1.0.0
-priority: P0
+version: 1.1.0
+priority: P1
 trigger: always_on
 ---
 
 # Request Routing - AG Kit
+
+> **Lead Flow override:** use `.agents/rules/lead-flow-governance.md` and `AGENTS.md`. This generic routing document is retained for kit compatibility and is not authoritative for stack, agent count or execution gates.
 
 > Always-active. Classify every request, then auto-route to the best specialist agent(s) before responding.
 

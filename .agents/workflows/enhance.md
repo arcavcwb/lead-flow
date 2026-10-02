@@ -9,6 +9,8 @@ artifact_outputs: change-plan, changed-files, verification-report
 
 # /enhance - Update Application
 
+> **Lead Flow override:** this generic workflow does not authorize feature work. A change must arrive as an approved `orch` task with an explicit agent, skills, gate and `allowed_paths`; do not commit or preview as an implicit side effect.
+
 $ARGUMENTS
 
 ---

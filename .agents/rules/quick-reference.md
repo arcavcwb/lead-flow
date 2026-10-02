@@ -8,6 +8,8 @@ description: Apply when you need a fast lookup of which agents, skills, or valid
 
 # Quick Reference - AG Kit
 
+> **Lead Flow override:** use `AGENTS.md`, `.agents/rules/lead-flow-governance.md` and `docs/ORCH-AGENT-SKILL-MATRIX.md` for the active catalog. Entries below are generic kit references and do not authorize loading a skill.
+
 > A fast index of the most-used agents, skills, and scripts.
 
 ## Agents & Skills

@@ -1,193 +1,186 @@
-# Modelo Operacional del Squad — Lead Flow Engine v1.0
+# Modelo operativo — Lead Flow v2.0
 
-> Documento maestro del modelo operacional. Define **quién hace qué**, **con qué modelo de IA**, **en qué momento** y **dónde el humano decide**. Si otra documentación contradice este archivo en materia de roles, estados o Gates, **este archivo manda**.
+> Estado: **APROBADO COMO BASELINE; COMMIT PENDIENTE**
+> Plataforma de agentes soportada: Gemini CLI / Google Antigravity.
+> El modelo concreto puede cambiar; gobiernan los roles, gates y evidencias.
 
----
+## 1. Propósito
 
-## 1. Propósito y one-liner
+Permitir que sesiones de Gemini analicen, implementen, prueben y revisen Lead Flow sin perder trazabilidad ni adquirir autoridad humana por inferencia.
 
-**One-liner:** Construir el ecosistema SaaS White-Label de captura de leads B2B/B2C que conecta prospectos con vendedores vía WhatsApp en **menos de 5 segundos**, usando un SDK SolidJS inyectable, Supabase como bóveda de datos y n8n como motor de automatización.
+## 2. Principios no negociables
 
-**Propósito de este documento:** Describir el modelo operacional del squad Lead Flow Engine — un esquadrón de roles especializados donde **un solo motor de IA (Antigravity / Gemini) opera en diferentes modos y modelos según el tipo de tarea**, coordinados sin conversación directa entre sesiones. El humano mantiene el control estratégico en tres puntos de control (*Gates*).
+1. Un agente no aprueba su propio trabajo.
+2. Un documento en estado `BORRADOR` no autoriza implementación.
+3. Una aprobación de SPEC no autoriza escritura remota.
+4. Una salida verde sin trabajo real es un fallo de gobernanza.
+5. Secretos y PII no entran en chat, Git, orch ni evidencia.
+6. El trabajo se limita al ticket; ampliar alcance requiere re-refinamiento.
+7. Git demuestra contenido, orch registra ejecución y el humano concede autoridad.
+8. Cuando hay contradicción, se detiene y se hace visible.
 
-**Reglas fundacionales (no negociables):**
+## 3. Roles
 
-1. **Plane es la única fuente de verdad.** Todo ticket, estado, comentario y entregable fluye por Plane. Lo que no está en Plane, no existe.
-2. **El PRD Maestro y el SPEC son contratos, no sugerencias.** Nada se implementa si no está mapeado en el PRD y especificado en el SPEC.
-3. **Ningún agente salta un Gate.** Los tres Gates humanos son bloqueantes.
-4. **Los escenarios Gherkin son el único criterio de aceptación.** Escenario sin cobertura = criterio **NO** cumplido.
-
----
-
-## 2. Tabla de roles y modelos
-
-| Fase | Rol | Actor / Modelo | Herramienta | Entregable | Gate |
-| --- | --- | --- | --- | --- | --- |
-| **Fase Zero — PRD** | Product Owner | **Humano + Antigravity Pro** (Gemini Pro) | Antigravity + Plane | `docs/1_PRD.md` + tickets en Backlog | **GATE 0** — el humano aprueba el PRD |
-| **Análisis — SPEC** | Analista (Líder Técnico) | **Antigravity Pro** (Gemini Pro) | Antigravity + Plane | `docs/SPEC-EX.md` con escenarios Gherkin | **GATE 1** — el humano aprueba el SPEC |
-| **Implementación** | Implementador | **Antigravity Pro** (Gemini Pro) | Antigravity + repo + Plane | Código en branch `feature/EX` | — (transición interna) |
-| **Testing** | Tester | **Antigravity Flash ⚡** (Gemini Flash) | Antigravity Flash + repo + Plane | Tests cubriendo cada escenario Gherkin | — (transición interna) |
-| **Revisión** | Revisor | **Claude Opus** 🔵 | Antigravity (modo Claude Opus) + Plane + Git | Auditoría del PR contra el SPEC | **GATE final** — el humano hace el merge |
-
-### Lógica de selección de modelo
-
-| Tarea | Modelo | Razón |
-| --- | --- | --- |
-| Escritura de SPEC, análisis arquitectónico, planning | **Gemini Pro** | Razonamiento profundo, coherencia con PRD |
-| Implementación de código (SDK, Edge Functions, tests E2E complejos) | **Gemini Pro** | Lógica compleja, Shadow DOM, Deno, SolidJS |
-| Testing de unidad, validaciones Gherkin, linting | **Gemini Flash ⚡** | Velocidad + ahorro de tokens en ciclos repetitivos |
-| **Auditoría de PR vs. SPEC (Revisión)** | **Claude Opus 🔵** | Arquitectura distinta a Gemini = revisión verdaderamente independiente, sin los mismos puntos ciegos. Es el auditor externo del sistema. |
-| Sync de Plane, actualizaciones de estado | **Gemini Flash ⚡** | Operación mecánica, sin razonamiento complejo |
-
-> **Regla de oro del modelo:**
-> - Diseñar, analizar, implementar → **Gemini Pro**
-> - Validar rápido, sincronizar → **Gemini Flash ⚡**
-> - Auditar con perspectiva independiente → **Claude Opus 🔵**
->
-> La separación Gemini (implementa) / Claude (revisa) reproduce la independencia arquitectónica del modelo CNDR original, pero dentro de un único entorno Antigravity.
-
----
-
-## 3. El ciclo de un ticket a través de Plane
-
-Cada entrega (`EX`) recorre estos estados de Plane. El flujo es lineal hacia adelante, con **un único salto hacia atrás permitido**: de revisión/pruebas de vuelta a desarrollo cuando algo falla.
-
-```
-Backlog → Refinado → En desarrollo → En pruebas → En revisión → Hecho
-   │         │            │              │             │           │
-  (Pro)     (Pro)        (Pro)         (Flash)       (Pro)    (Humano)
-              │                                          │
-           GATE 1                                   GATE final
-```
-
-**Recorrido detallado:**
-
-1. **Backlog** — *(origen: Fase Zero)*
-   - Aquí residen las entregas extraídas del `docs/1_PRD.md` tras la aprobación del **GATE 0**.
-   - Nadie toca el código. Es el pool de trabajo priorizado por el humano/PO.
-
-2. **Refinado** — *(actúa Antigravity Pro, rol Analista)*
-   - Antigravity Pro toma un ticket del Backlog, lee `docs/1_PRD.md`, `docs/3_ARCHITECTURE.md` y el estado del repo, y produce `docs/SPEC-EX.md`.
-   - El SPEC incluye resumen técnico, estructura de componentes, **escenarios Gherkin obligatorios** y el desglose de subtareas.
-   - Al terminar, el ticket queda en **Refinado** con el SPEC vinculado.
-   - **GATE 1 (bloqueante):** el humano aprueba el SPEC. Sin aprobación, el ticket **no** avanza a implementación.
-
-3. **En desarrollo** — *(actúa Antigravity Pro, rol Implementador)*
-   - Antigravity Pro lee el SPEC aprobado, crea el branch `feature/EX`, mueve el ticket a **En desarrollo** y escribe el código **exactamente como está especificado**.
-   - Usa SolidJS + Shadow DOM + Vite para SDK; Deno + TypeScript para Edge Functions. Commits atómicos: `feat(EX): ...`.
-   - Al terminar, comenta en el ticket que la implementación está lista.
-
-4. **En pruebas** — *(actúa Antigravity Flash ⚡, rol Tester)*
-   - Antigravity Flash mueve el ticket a **En pruebas** y escribe/ejecuta los tests que cubren **cada escenario Gherkin** del SPEC (Playwright / Vitest según el escenario).
-   - **Si algo falla:** devuelve el ticket a **En desarrollo** y comenta los errores.
-   - **Si todo pasa:** hace commit de los tests, documenta el reporte y avanza a revisión.
-
-5. **En revisión** — *(actúa Antigravity Pro, rol Revisor)*
-   - Antigravity Pro mueve el ticket a **En revisión** y audita el PR **mecánicamente contra el SPEC**: verifica que cada escenario Gherkin tenga cobertura, que las convenciones SolidJS/Deno sean respetadas y que no haya riesgos evidentes (código muerto, `console.log`, dependencias pesadas).
-   - Emite el veredicto:
-     - **CAMBIOS SOLICITADOS** → devuelve a **En desarrollo**.
-     - **APROBADO** → comenta en el ticket que está listo para el merge humano.
-   - **GATE final (bloqueante):** el humano revisa y **hace el merge**. Antigravity nunca hace merge.
-
-6. **Hecho** — *(cierra el Humano)*
-   - Tras el merge, el ticket pasa a **Hecho**. La funcionalidad está aprobada y en branch principal.
-
----
-
-## 4. La frontera: sesión de análisis ⟷ sesión de implementación
-
-En este modelo, **Antigravity es el único motor de IA**, pero opera en **sesiones separadas** con **modelos distintos** según el rol. Las sesiones nunca se hablan directamente.
-
-**La interfaz entre sesiones es exclusivamente:**
-
-- **Plane** — para estado, asignación, comentarios y trazabilidad.
-- **El repositorio** — para el contrato (`docs/SPEC-EX.md`), el PRD, el código y los tests.
-
-```
-     SESIÓN ANALISTA/REVISOR (Pro)            FRONTERA                SESIÓN IMPLEMENTADOR/TESTER (Pro/Flash)
-   ┌──────────────────────────────┐     ┌──────────────────┐     ┌──────────────────────────────┐
-   │ Analista: escribe SPEC       │ ──► │  Plane + Repo    │ ──► │ Implementador: código        │
-   │ Revisor: audita PR vs SPEC   │ ◄── │  (SPEC, código,  │ ◄── │ Tester: tests Gherkin        │
-   │ Humano: PRD + Gates          │     │  estados, PR)    │     │                              │
-   └──────────────────────────────┘     └──────────────────┘     └──────────────────────────────┘
-```
-
-| Situación | Cómo se resuelve |
-| --- | --- |
-| El Analista necesita comunicar algo al Implementador | Escribe en el **SPEC** o en un **comentario del ticket** en Plane |
-| El Implementador encuentra una ambigüedad en el SPEC | **Detiene la implementación** y comenta en el ticket. No adivina. El humano/Analista corrige el SPEC |
-| El Implementador terminó | Cambia el **estado en Plane** y sube el **PR**. El Revisor lo detecta por Plane/Git |
-| El Revisor pide cambios | Deja **comentarios en el PR** y devuelve el ticket a *En desarrollo* en Plane |
-
----
-
-## 5. El SPEC / Gherkin como contrato de ejecución
-
-`docs/SPEC-EX.md` **no es documentación descriptiva: es un contrato de ejecución**. El Implementador ejecuta **literalmente** lo que el SPEC dice; **no interpreta intención, no rellena lagunas, no infiere lo "obvio"**.
-
-**Forma canónica de cada criterio en el SPEC:**
-
-```gherkin
-Escenario: <nombre claro y único>
-  Dado <estado/contexto inicial>
-  Cuando <acción del usuario o del sistema>
-  Entonces <resultado observable y verificable>
-```
-
-Si un criterio del PRD no puede expresarse como Gherkin verificable, **no está listo para pasar a implementación**.
-
----
-
-## 6. Stack técnico y convenciones de archivos
-
-**Stack Lead Flow Engine:**
-
-| Capa | Tecnología | Nota |
-| --- | --- | --- |
-| SDK Widget | **SolidJS + Shadow DOM + Vite** | Bundle IIFE < 50kb |
-| Web Component | **solid-element** | Aislamiento CSS total |
-| Backend / Gatekeeper | **Supabase Edge Functions (Deno)** | CORS + Rate Limiting + RLS |
-| Base de datos | **Supabase PostgreSQL** | 3 tablas + RLS |
-| Automatización | **n8n (VPS)** | Modo webhook-only + Dead Letter Queue |
-| Mensajería | **WAHA (WhatsApp HTTP API)** | WhatsApp, VPS propio |
-| Gestión | **Plane** (via API) | Única fuente de verdad |
-| Control de versiones | **Git + PR** | Branches `feature/EX`, commits `feat(EX): ...` |
-| Testing | **Playwright + Vitest** | Elegido por escenario en el SPEC |
-| Paquetes | **pnpm workspaces** | Monorepo |
-
-**Convenciones de archivos (localización fija):**
-
-| Archivo | Ubicación | Dueño / Rol | Contenido |
+| Rol | Responsabilidad | Puede editar | No puede |
 | --- | --- | --- | --- |
-| `docs/1_PRD.md` | `/docs` | Product Owner | Requisitos, entregas, criterios de aceptación |
-| `docs/SPEC-EX.md` | `/docs` | Analista (Antigravity Pro) | Contrato técnico + escenarios Gherkin |
-| `docs/OPERATING-MODEL.md` | `/docs` | Este documento | Modelo operacional del squad |
-| `docs/HANDOFF-PROTOCOL.md` | `/docs` | Protocolo | Transiciones de estado y handoffs |
-| `docs/STATE.md` | `/docs` | Estado vivo | Estado actual de entregas |
-| Agentes | `.agents/agent/` | Squad | Especialistas del AG Kit |
+| Product Owner humano | Prioridad, riesgo, gates y release | Aprobaciones versionadas, decisiones y PR | Delegar gates implícitamente |
+| Analista Gemini | Convertir ticket en SPEC verificable | SPEC y propuesta de decisión | Implementar o aprobar el SPEC |
+| Implementador Gemini | Ejecutar exactamente el SPEC aprobado | Archivos permitidos del ticket | Cambiar arquitectura o tocar remoto sin gate |
+| Tester Gemini | Diseñar/ejecutar pruebas desde Gherkin | Tests y reporte dentro del ticket | Rebajar criterios para hacerlos pasar |
+| Revisor Gemini | Auditar diff, pruebas, seguridad y alcance | Comentarios/reporte; corrección solo si se abre ticket | Revisar como continuidad de la misma sesión implementadora |
+| Release Operator humano | Autorizar merge y mutaciones remotas | Git/servicios autorizados | Asumir que CI sustituye revisión de riesgo |
 
----
+Una persona puede usar el mismo modelo de Gemini para varios roles, pero debe hacerlo en sesiones separadas, recargando fuentes y sin reutilizar una autoevaluación como revisión independiente.
 
-## 7. Lo que cada parte NO hace
+## 4. Fuentes de verdad
 
-**Antigravity Pro (Analista + Revisor) NO:**
-- ❌ **No hace merge.** Aprueba técnicamente, pero el merge es del humano (GATE final).
-- ❌ **No aprueba sus propios Gates.** El PRD y el SPEC son aprobados por el humano.
-- ❌ **No inventa lógica no especificada.** Si algo no está en el SPEC → `__PENDIENTE__` + comenta en Plane.
+- Producto/arquitectura: documentos aprobados en Git.
+- Contrato del ticket: SPEC aprobado y vinculado a una versión/commit.
+- DAG y estado operativo: `tasks.json` + eventos de orch.
+- Estado técnico: commit/PR concreto.
+- Evidencia: CI y reportes vinculados al mismo SHA.
+- Autoridad: acciones humanas de gate.
 
-**Antigravity Pro (Implementador) NO:**
-- ❌ **No decide arquitectura.** No cambia el enfoque técnico definido en el SPEC.
-- ❌ **No introduce dependencias pesadas** salvo que el SPEC lo indique explícitamente.
-- ❌ **No audita su propio trabajo como Revisor.** La revisión final es una sesión separada.
+La resolución completa está en `docs/SOURCE_OF_TRUTH.md`.
 
-**Antigravity Flash (Tester) NO:**
-- ❌ **No escribe el SPEC ni diseña los casos de prueba.** Los Gherkin vienen del SPEC.
-- ❌ **No decide si un test "casi pasa".** Verde = verde. Rojo = devuelve a desarrollo.
+## 5. Estados canónicos de ejecución
 
-**El Humano (Product Owner + dueño de los Gates) NO:**
-- ❌ **No delega la decisión de los Gates.** GATE 0 (PRD), GATE 1 (SPEC) y GATE final (merge) son suyos e intransferibles.
+| Estado | Definición | Actor activo |
+| --- | --- | --- |
+| `todo` | Brief priorizado, sin SPEC aprobado | Product Owner / Analista |
+| `ready` | SPEC aprobado mediante GATE 1 y dependencias completas | Humano / Implementador |
+| `in-progress` | Implementación autorizada en worktree | Implementador |
+| `blocked` | Condición de parada registrada | Actor actual / Humano |
+| `review` | Código, pruebas y evidencia listos para auditoría | Tester / Revisor / Humano |
+| `done` | Merge humano y criterios de cierre completos | Ninguno |
 
-**Ningún agente (regla transversal) NO:**
-- ❌ **No salta un Gate.**
-- ❌ **No trata un escenario Gherkin como opcional.**
-- ❌ **No usa el chat como canal de handoff entre sesiones.** Toda coordinación ocorre en Plane y el repo.
+Los bloqueos usan el estado `blocked` y un evento estructurado. El mapeo final se valida contra la versión instalada de orch.
+
+## 6. Gates humanos
+
+| Gate | Autoriza | Evidencia necesaria | No autoriza |
+| --- | --- | --- | --- |
+| `GATE 0` | Baseline de PRD, arquitectura y plan | Versión + SHA + comentario `PRD/plan aprobado` | Implementación de cualquier ticket sin SPEC |
+| `GATE 1` | Implementar un SPEC concreto | `spec-aprobado`, versión y SHA del SPEC | Deploy, migración remota o envío real |
+| `GATE 2` | Una mutación externa delimitada | Target, operación, ventana, rollback y comentario `remote-write-approved` | Otras cuentas, entornos o ejecuciones futuras |
+| `GATE 3` | Merge/release | Review aprobado, CI del SHA y decisión humana | Saltar smoke test o cerrar incidentes pendientes |
+
+### Alcance de GATE 2
+
+Requieren GATE 2, entre otros:
+
+- `supabase link` cuando expone/accede a un proyecto real por primera vez.
+- `supabase db push`, deploy de Edge Functions y cambios de secrets.
+- Mutaciones manuales de orch que eludan scripts, gates o evidencia.
+- Deploy a VPS o cloud.
+- Envíos a números reales.
+- Creación/modificación de workflows n8n remotos.
+- Cualquier escritura en datos de clientes.
+
+El gate es de una sola operación o ventana definida. No es una credencial permanente.
+
+## 7. Flujo de un ticket
+
+```text
+todo
+  │ Analista redacta SPEC
+  ▼
+ready ── GATE 1 humano registrado
+  │
+  ▼
+in-progress
+  │ implementación + auto-check
+  ▼
+review
+  │ evidencia por Gherkin
+  ├─ cambios solicitados → in-progress
+  └─ revisión aprobada + GATE 3 → merge humano → done
+```
+
+Las mutaciones remotas que aparezcan dentro de cualquier etapa se detienen en `GATE 2` sin cambiar por sí solas el estado del ticket.
+
+## 8. Definition of Ready
+
+Un ticket entra a desarrollo solo si:
+
+- [ ] La tarea existe en `tasks.json` y tiene alcance único.
+- [ ] Existe un SPEC `LISTO PARA APROBACIÓN` o `APROBADO`.
+- [ ] El SPEC referencia versión vigente de PRD/arquitectura.
+- [ ] Entradas, salidas, errores y límites están definidos.
+- [ ] Cada criterio tiene Gherkin verificable.
+- [ ] Se enumeran archivos permitidos y exclusiones.
+- [ ] Dependencias y riesgos están identificados.
+- [ ] Se declara si necesitará GATE 2.
+- [ ] El humano concedió GATE 1 para esa versión.
+
+## 9. Definition of Done
+
+Un ticket solo llega a `done` cuando:
+
+- [ ] El diff coincide con el SPEC y no amplía alcance.
+- [ ] Cada Gherkin tiene evidencia vinculada al SHA.
+- [ ] Quality gates reales están verdes.
+- [ ] No hay secretos, PII ni artefactos locales versionados.
+- [ ] Se actualizaron documentos/ADRs afectados.
+- [ ] El reviewer independiente emitió veredicto.
+- [ ] El humano hizo el merge.
+- [ ] Si hubo mutación remota, se verificó resultado y rollback.
+- [ ] orch, Git y `STATE.md` reflejan la realidad.
+
+El merge no equivale automáticamente a deploy. Un ticket de código puede estar `done` con release posterior explícito si el SPEC lo define así.
+
+## 10. Matriz de permisos del agente
+
+| Acción | Sin gate | GATE 1 | GATE 2 | GATE 3/humano |
+| --- | --- | --- | --- | --- |
+| Leer repo y estado | Sí | — | — | — |
+| Redactar propuesta/SPEC | Sí | — | — | — |
+| Editar código del ticket | No | Sí | — | — |
+| Ejecutar tests locales | No, salvo diagnóstico read-only acordado | Sí | — | — |
+| Crear branch/commit/push | Según ticket y permisos | Sí | Push según gobernanza | Merge no |
+| Escribir en Supabase/n8n/VPS remoto | No | No | Sí, alcance exacto | — |
+| Abrir PR | Tras evidencia/revisión según protocolo | Sí | — | — |
+| Hacer merge/release | No | No | No | Humano |
+
+## 11. Selección de Gemini
+
+- Razonamiento, SPEC, arquitectura e implementación compleja: capacidad Pro disponible.
+- Pruebas mecánicas y sincronización: capacidad rápida/económica disponible.
+- Revisión: sesión limpia y, cuando sea posible, configuración/modelo diferente al implementador.
+
+El nombre del modelo no es evidencia de calidad. El reviewer debe leer fuentes, diff y resultados desde cero.
+
+## 12. Bloqueos y excepciones
+
+Formato obligatorio:
+
+```text
+BLOCKED_BY: <condición concreta>
+EVIDENCE: <archivo/comando/error sin secretos>
+IMPACT: <qué no puede continuar>
+NEEDED_FROM_HUMAN: <una decisión o acceso concreto>
+SAFE_WORK_REMAINING: <si existe>
+```
+
+No usar `__PENDIENTE__` dentro de código de producción para ocultar una decisión ausente. Una excepción temporal debe tener owner, expiración, riesgo y ticket de remediación.
+
+## 13. Trabajo paralelo
+
+Solo se paraleliza cuando los outputs no compiten por los mismos archivos/decisiones. El coordinador define ownership y sintetiza antes del merge. Dos agentes no editan simultáneamente el mismo SPEC, migración o contrato de API.
+
+## 14. Arranque de Gemini
+
+Toda sesión comienza declarando:
+
+```text
+Ticket:
+Rol:
+Estado orch:
+SPEC + versión:
+Gates observados:
+Archivos permitidos:
+Mutaciones remotas previstas:
+Comandos de verificación:
+```
+
+Si no puede completar el bloque con evidencia, la sesión queda en modo investigación/propuesta.

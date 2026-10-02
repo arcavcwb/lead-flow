@@ -9,6 +9,7 @@ build/
 
 # entorno
 .env
+.orchestrator/state/
 .env.local
 .env.development.local
 .env.test.local
@@ -26,3 +27,6 @@ pnpm-debug.log*
 # supabase local
 supabase/.temp/
 supabase/.branches/
+
+# posible credencial detectada; conservar fuera de Git hasta decisión humana
+docs/secret-key-1784657889018.csv

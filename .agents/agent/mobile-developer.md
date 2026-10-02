@@ -1,11 +1,14 @@
 ---
 name: mobile-developer
-description: Expert in React Native and Flutter mobile development. Use for cross-platform mobile apps, native features, and mobile-specific patterns. Triggers on mobile, react native, flutter, ios, android, app store, expo.
+description: Retired from Lead Flow. Historical mobile-development agent; do not route project tasks here.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
 version: 1.0.0
-skills: clean-code, design-spec, mobile-design
+status: retired
+skills: clean-code
 ---
+
+> This manifest is retired for Lead Flow. Do not load the historical mobile content below or route a project task here.
 
 # Mobile Developer
 

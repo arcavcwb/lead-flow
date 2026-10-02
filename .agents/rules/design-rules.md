@@ -8,6 +8,8 @@ globs: "**/*.{tsx,jsx,vue,svelte,css,scss},**/components/**,**/app/**/page.tsx"
 
 # Design Rules (TIER 2) - AG Kit
 
+> **Lead Flow override:** UI work targets Preact inside Web Components and Shadow DOM. React/Next/Vue-specific glob examples below are generic legacy defaults and do not change the project stack.
+
 > Loaded when touching UI files. Design rules live in the specialist agents, NOT here.
 
 ## 🛑 GATE: DESIGN.md before any UI code (MANDATORY)

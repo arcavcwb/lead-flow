@@ -1,37 +1,128 @@
-# Plan de Setup: Infraestructura Supabase (Local + MCP)
+# Plan gobernado de Supabase — Lead Flow
 
-Antes de poder ejecutar el ticket `LEADFLOW-05` (que requiere crear tablas y seguridad RLS), necesitamos que el ecosistema de Supabase exista y esté conectado a la Inteligencia Artificial a través de MCP y el CLI.
+> Estado: **BORRADOR; NO AUTORIZA COMANDOS REMOTOS**
+> Última verificación de documentación oficial: 2026-10-02.
+> Perfil remoto propuesto: un proyecto Supabase Free para MVP/piloto; ver `SUPABASE-FREE-TIER-READINESS.md`.
 
-## Análisis de Requerimientos Previos
+## 1. Propósito
 
-Para que el Squad de IA (Antigravity) pueda interactuar de forma autónoma con la base de datos, ejecutar migraciones SQL y compilar Edge Functions de Deno, se debe establecer el siguiente puente bidireccional:
+Definir cómo Gemini debe preparar y verificar Supabase de forma local antes de solicitar autorización para vincular o cambiar un proyecto remoto.
 
-1. **Entorno Remoto (Cloud):** El proyecto debe existir físicamente en Supabase.
-2. **Entorno Local (Código):** El CLI de Supabase debe estar inicializado en el repositorio (`supabase/`).
-3. **Control MCP (Agentes):** El servidor MCP de Supabase que tenemos instalado debe tener acceso a las credenciales para poder leer, escribir y ejecutar comandos en la base de datos.
+## 2. Estado observado
 
-## Paso a Paso del Flujo (El "Pre-Código")
+- Existe `supabase/config.toml`.
+- La migración local antigua fue retirada; LEADFLOW-05 debe crear un conjunto de migraciones nuevo, revisable y compatible con PRD/arquitectura v2.
+- El Product Owner cree que ya existe un proyecto remoto Free, pero no se confirmó su referencia, plan, región, schema ni estado.
+- El contenido de `.env` no fue inspeccionado.
 
-### Paso 1: Acción Humana (Creación del Proyecto Cloud)
-- **Actor:** Product Owner (Humano)
-- **Acción:** Entrar a [supabase.com](https://supabase.com), crear un proyecto nuevo llamado `lead-flow-engine`.
-- **Salida requerida:** Obtener el `Reference ID` del proyecto y el `Database Password`.
+No existe una migración legacy aprobada para reutilizar. Gemini debe diseñar el baseline de schema desde cero dentro de `SPEC-LEADFLOW-05`; no puede ejecutar cambios remotos sin GATE 2.
 
-### Paso 2: Inicialización Local (Supabase CLI)
-- **Actor:** Implementador (Agente IA)
-- **Acción:** 
-  1. Ejecutar `npx supabase init` en la raíz del proyecto.
-  2. Crear la estructura de carpetas: `supabase/functions/` y `supabase/migrations/`.
-  3. Ejecutar `npx supabase link --project-ref <REFERENCE_ID>`.
+## 3. Decisiones
 
-### Paso 3: Prioridad de Trazabilidad (CLI Local vs MCP)
-- **Actor:** Humano / IA
-- **Acción:** Por arquitectura y trazabilidad de Git, **no** utilizaremos el MCP para ejecutar `execute_sql` directamente en producción de forma anónima. Todas las migraciones deben escribirse como archivos locales en `supabase/migrations/` y aplicarse a través del CLI de Supabase (ej. `npx supabase db push`). El MCP de Supabase se puede usar **solo de lectura** (`list_tables`) para auditar que el CLI hizo su trabajo.
+- Workflow de schema: migraciones imperativas versionadas.
+- Desarrollo: local-first mediante Supabase CLI y runtime compatible con Docker.
+- Navegador: no accede directamente a tablas internas.
+- MCP: opcional y read-only para inventario/auditoría; no aplica SQL.
+- Deploy remoto: CLI con preview/dry-run y GATE 2.
+- Datos local/staging: sintéticos.
+- Producción: no se crea ni modifica durante Cycle 0/1 sin ticket y gate explícitos.
+- Free tier: se usa para MVP/piloto sin SLA; cuota, uso y posible estado read-only son riesgos operativos explícitos.
 
-### Paso 4: Smoke Test (Prueba de Vida)
-- **Actor:** Tester (Flash)
-- **Acción:** Ejecutar el comando local de Supabase CLI para linkear el proyecto y verificar el estado. El puente estará listo cuando el CLI local pueda comunicarse con la base de datos remota sin errores.
+## 4. Secretos
 
----
+| Secreto/dato | Ubicación permitida | Prohibido |
+| --- | --- | --- |
+| Supabase access token | Login/almacén seguro del operador | Git, orch, chat |
+| Database password | Prompt/secret store autorizado | `.env.example`, comando visible |
+| Edge Function secrets | Local env ignorado; Supabase Secrets remoto | Variables `VITE_*`, logs |
+| Publishable key | Solo donde el diseño público la requiera | Confundirla con autorización de tablas |
+| Secret/service-role key | Entorno servidor exclusivamente | SDK/browser/documentos |
 
-> **Resolución Estratégica:** Este proceso pertenece a la Épica de Infraestructura (Módulo A). Vamos a utilizar el ticket **LEADFLOW-02** (que actualmente es el Setup del Monorepo) para abarcar esta configuración del CLI de Supabase, ya que es fundacional.
+El SDK de Lead Flow llama Edge Functions y no necesita una clave de servicio. Un prefijo público como `VITE_` nunca se usa para secretos.
+
+## 5. Flujo local que deberá ejecutar Gemini
+
+Solo después de GATE 1 de LEADFLOW-02/05:
+
+1. Descubrir comandos y versión con `supabase --help` y `supabase --version`; no adivinar flags.
+2. Verificar runtime local y compatibilidad de `config.toml`.
+3. Resolver el borrador de migración existente según decisión humana.
+4. Crear migraciones nuevas mediante `supabase migration new <nombre>`.
+5. Aplicar desde cero en local con el comando vigente de reset local.
+6. Cargar solo seed sintético.
+7. Ejecutar tests de constraints, grants y RLS.
+8. Ejecutar advisors disponibles y revisar funciones/vistas.
+9. Generar tipos desde local cuando el código los consuma.
+10. Adjuntar evidencia sin URLs ni credenciales.
+
+## 6. Requisitos de schema y seguridad
+
+- `GRANT`/`REVOKE` explícitos en la misma migración que crea objetos.
+- RLS habilitado como defensa adicional en tablas de esquemas expuestos.
+- Sin `INSERT`, `SELECT`, `UPDATE` o `DELETE` de `anon` sobre tablas internas.
+- Sin políticas públicas `USING (true)` o `WITH CHECK (true)` para leads.
+- Funciones privilegiadas fuera del schema expuesto, con `search_path` controlado, permisos revocados y revisión específica.
+- Vistas expuestas solo si son necesarias y con semantics `security_invoker` compatibles.
+- Índices/constraints de tenant, idempotencia, outbox y retries probados.
+- Migrations reproducibles desde base vacía.
+
+Supabase separa privilegios de objeto y RLS; ambos deben probarse. Los nuevos defaults de Data API exigen no depender de grants implícitos.
+
+## 7. Inventario remoto y preparación
+
+El primer contacto con el proyecto candidato es un inventario read-only conforme a `SUPABASE-FREE-TIER-READINESS.md`. Si se encuentra estado previo no decidido, se bloquea: no se enlaza, limpia ni migra.
+
+Antes de solicitar GATE 2, Gemini presenta:
+
+```text
+Project ref (redacted/parcial):
+Entorno: staging | production
+Plan/capacidad: Free confirmado | no confirmado; uso observado y umbral de alerta
+CLI version:
+Linked project actual (si existe):
+Migration list local/remota:
+Dry-run:
+Objetos afectados:
+Backup/rollback:
+Tests locales:
+Riesgos:
+```
+
+La ejecución autorizada debe:
+
+1. Confirmar target inmediatamente antes del comando.
+2. Ejecutar solo el dry-run/aplicación aprobados.
+3. No incluir seed en producción.
+4. Reconsultar migration history y objetos esperados.
+5. Ejecutar smoke tests negativos/positivos.
+6. Registrar el resultado en los eventos de orch y `STATE.md` sin secretos.
+
+## 8. Comandos prohibidos
+
+- `supabase db reset --linked` sobre producción.
+- SQL directo en producción para “probar rápido”.
+- MCP `execute_sql` como bypass del flujo de migraciones.
+- `db push` sin dry-run, backup/rollback y GATE 2.
+- Imprimir `.env`, tokens o connection strings.
+- Copiar credenciales a argumentos que queden en historial/logs.
+- Aplicar la migración borrador actual.
+- Asumir que Free evita restricciones, pausas o modo read-only.
+
+## 9. Smoke tests requeridos
+
+- Las tablas esperadas existen y ninguna extra fue creada.
+- `anon` no puede consultar ni insertar en tablas internas.
+- El contexto servidor puede ejecutar únicamente la operación necesaria.
+- Una captura atómica crea lead + outbox o ninguno.
+- Tenant A no puede leer/modificar tenant B.
+- Idempotency constraint evita duplicados.
+- Retry indexes soportan reclamar pendientes sin full scan evidente.
+- No hay funciones públicas privilegiadas no aprobadas.
+
+## 10. Referencias oficiales
+
+- Local workflow y deploy: <https://supabase.com/docs/guides/local-development/cli-workflows>
+- Database migrations: <https://supabase.com/docs/guides/local-development/database-migrations>
+- Data API, grants y RLS: <https://supabase.com/docs/guides/api/securing-your-api>
+- Edge Function secrets: <https://supabase.com/docs/guides/functions/secrets>
+- Breaking changes: <https://supabase.com/changelog?types=breaking-change>

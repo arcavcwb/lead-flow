@@ -1,51 +1,66 @@
-# 🚀 Lead Flow Engine
+# Lead Flow
 
-> **Ecosistema SaaS B2B "White-Label" de captura de leads ultrarrápida.**
+Lead Flow captura prospectos desde sitios existentes, los guarda antes de cualquier integración externa y entrega una alerta al equipo comercial con trazabilidad de extremo a extremo.
 
-Lead Flow Engine es un sistema de captura y enrutamiento de leads diseñado para tiempos de carga extremos (TTI < 200ms), inmunidad CSS y despliegue agnóstico. Se compone de un widget inyectable, un backend serverless hiper-seguro y un motor de automatización en tiempo real hacia WhatsApp.
+## Estado actual
 
----
+El proyecto está en **replanificación v2**. La arquitectura y la gobernanza fueron aprobadas para preparar la integración de `orch`, pero Gemini todavía no puede implementar tickets sin SPEC y GATE 1.
 
-## 🏗️ Stack Tecnológico en 4 Capas
+No se debe interpretar la presencia de scaffolding, configuración de CI o migraciones como una entrega terminada. El estado verificable se mantiene en [`docs/STATE.md`](docs/STATE.md).
 
-1. **Frontend (SDK Inyectable):** `SolidJS` + Web Components (Shadow DOM). Compilado con `Vite` para pesar `< 50kb` y evadir conflictos CSS de sitios heredados.
-2. **Gatekeeper (Middleware):** `Supabase Edge Functions` (Deno) para control CORS estricto, honeypot anti-bots y validación multi-dominio.
-3. **Bóveda (Base de Datos):** `Supabase PostgreSQL` con *Row Level Security (RLS)* bloqueando accesos anónimos. Usa `JSONB` para máxima flexibilidad *white-label*.
-4. **Automatización:** `n8n` hospedado en VPS, conectado a `WAHA` (WhatsApp HTTP API) con políticas de *Dead Letter Queue (DLQ)*.
+## Resultado que se quiere validar
 
----
-
-## 📚 Documentación y Fuente de Verdad
-
-Este repositorio está diseñado para ser construido y auditado por un **Squad de Inteligencia Artificial (Antigravity)**. No existe conocimiento tribal; **si no está en los documentos, no existe**.
-
-Si acabas de llegar al proyecto, tu punto de partida obligatorio es:
-👉 **[SOURCE OF TRUTH](docs/SOURCE_OF_TRUTH.md)**
-
-### 📖 Enlaces Rápidos (Pilar Estratégico)
-- [1. PRD (Product Requirements Document)](docs/1_PRD.md)
-- [2. Modelo de Negocio](docs/2_BUSINESS_MODEL.md)
-- [3. Arquitectura Técnica](docs/3_ARCHITECTURE.md)
-
-### 🤖 Operaciones y Tickets
-- [Modelo Operacional de IA](docs/OPERATING-MODEL.md) - Cómo trabajan Pro, Flash y Claude.
-- [Protocolo de Handoff](docs/HANDOFF-PROTOCOL.md) - Cómo se aprueban las fases (Gates).
-- **[STATE.md](docs/STATE.md) - El estado vivo de los tickets (Plane).**
-
----
-
-## 🛠️ Desarrollo Local (Monorepo)
-
-Este proyecto utiliza `pnpm workspaces`.
-
-```bash
-# 1. Instalar dependencias
-pnpm install
-
-# 2. Correr verificaciones de calidad locales (Mismas que el CI en GitHub Actions)
-pnpm lint
-pnpm typecheck
+```text
+Prospecto → widget → captura segura → persistencia + outbox
+                                      ↓
+                               entrega + reintentos
+                                      ↓
+                                   vendedor
 ```
 
----
-*Proyecto orquestado y desarrollado por la tripulación de IA (Gemini Pro, Flash y Claude).*
+El objetivo piloto es que la alerta sea aceptada por el proveedor de mensajería en `p95 ≤ 5 s`, sin perder ni duplicar el lead cuando una integración falle.
+
+## Lectura obligatoria para Gemini/Antigravity
+
+1. [`AGENTS.md`](AGENTS.md) y [`GEMINI.md`](GEMINI.md) — roles y contrato compartido.
+2. [`docs/STATE.md`](docs/STATE.md) — realidad actual y bloqueos.
+3. [`docs/SOURCE_OF_TRUTH.md`](docs/SOURCE_OF_TRUTH.md) — precedencia documental.
+4. [`docs/ORCH-AGENT-SKILL-MATRIX.md`](docs/ORCH-AGENT-SKILL-MATRIX.md) — asociación tarea/agente/skills.
+5. [`lead-flow-execution-plan.md`](lead-flow-execution-plan.md) — orden y dependencias.
+6. [`docs/1_PRD.md`](docs/1_PRD.md) — contrato de producto.
+7. [`docs/3_ARCHITECTURE.md`](docs/3_ARCHITECTURE.md) — límites técnicos.
+8. [`docs/SUPABASE-FREE-TIER-READINESS.md`](docs/SUPABASE-FREE-TIER-READINESS.md) — límites, inventario y salida de Free.
+9. [`docs/OPERATING-MODEL.md`](docs/OPERATING-MODEL.md) — roles y permisos.
+10. [`docs/HANDOFF-PROTOCOL.md`](docs/HANDOFF-PROTOCOL.md) — estados, gates y evidencia.
+11. El SPEC aprobado del ticket asignado.
+
+## Regla de inicio
+
+Gemini no debe empezar implementación porque una tarea aparezca en `tasks.json`. Solo puede hacerlo cuando el ticket esté `ready`, tenga un SPEC con estado `APROBADO` y el humano haya registrado el gate correspondiente en el repositorio. `orch run` nunca concede autoridad por sí mismo.
+
+Las migraciones, despliegues, envíos reales de WhatsApp y cualquier otra escritura remota requieren además `GATE 2` explícito.
+
+## Documentación
+
+| Documento | Propósito |
+| --- | --- |
+| [`docs/1_PRD.md`](docs/1_PRD.md) | Problema, usuarios, alcance y éxito del MVP |
+| [`docs/2_BUSINESS_MODEL.md`](docs/2_BUSINESS_MODEL.md) | Oferta y economía como hipótesis medibles |
+| [`docs/3_ARCHITECTURE.md`](docs/3_ARCHITECTURE.md) | Arquitectura objetivo y fronteras de seguridad |
+| [`docs/SUPABASE-FREE-TIER-READINESS.md`](docs/SUPABASE-FREE-TIER-READINESS.md) | Perfil Free, inventario remoto y límites operativos |
+| [`docs/4_GO_TO_MARKET.md`](docs/4_GO_TO_MARKET.md) | Descubrimiento, piloto y reglas de claims |
+| [`docs/5_QA_PROTOCOL.md`](docs/5_QA_PROTOCOL.md) | Pruebas y evidencia obligatoria |
+| [`docs/6_ARCHITECT_REVIEW.md`](docs/6_ARCHITECT_REVIEW.md) | ADR, riesgos y disparadores de revisión |
+| [`docs/ORCH-SETUP.md`](docs/ORCH-SETUP.md) | Diseño de integración y operación local de orch |
+| [`AGENTS.md`](AGENTS.md) / [`GEMINI.md`](GEMINI.md) | Puente compartido para Codex y Gemini |
+| [`docs/ORCH-AGENT-SKILL-MATRIX.md`](docs/ORCH-AGENT-SKILL-MATRIX.md) | Routing explícito de tareas |
+| [`docs/GATE-0-REVIEW.md`](docs/GATE-0-REVIEW.md) | Checklist para aprobar la baseline antes de orch |
+
+## Restricciones no negociables
+
+- No publicar secretos, `.env`, PAT, contraseñas ni claves de servicio.
+- No exponer tablas internas directamente al navegador.
+- No hacer self-merge ni autoaprobar gates.
+- No prometer SLA, escala, margen o clientes sin evidencia.
+- No prometer SLA sobre Evolution API hasta inventariar la instancia existente, confirmar si usa Baileys o WhatsApp Cloud API y medir su operación.
+- No marcar un ticket como hecho con comandos vacíos, omitidos o falsamente verdes.
