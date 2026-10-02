@@ -1,8 +1,18 @@
 # GATE 1 — LEADFLOW-01
 
-> Estado: **PREPARADO; PENDIENTE DE APROBACIÓN DEL PRODUCT OWNER**  
-> Baseline revisada: `39f954e`  
+> Estado: **APROBADO POR EL PRODUCT OWNER**
+> Baseline revisada: `9873666`
 > Fecha: 2026-10-02
+
+## Aprobación humana
+
+```text
+Persona: Product Owner
+Decisión: APROBADO GATE 1 para LEADFLOW-01
+Autorización: Gemini/Antigravity puede ejecutar únicamente este alcance
+Prohibiciones: Supabase, n8n, Evolution API, servicios remotos y despliegues
+Registro: aprobación explícita recibida en la sesión del 2026-10-02
+```
 
 ## Ticket
 
@@ -75,5 +85,6 @@ BLOCKERS: discrepancias o ninguno
 NEXT_ACTION: revisión Codex y decisión del Product Owner
 ```
 
-Este documento prepara el gate; no lo concede. El estado de `orch` permanece
-`todo` hasta que el Product Owner apruebe esta tarea y su SPEC.
+El gate quedó concedido únicamente para este ticket y este alcance. Las demás
+tareas permanecen sin autorización. El estado de `orch` puede pasar a ejecución
+controlada solo mediante `orch run --only LEADFLOW-01 --max-tasks 1 --no-push`.

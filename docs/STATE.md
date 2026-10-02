@@ -50,7 +50,7 @@ Esta tabla es la fuente para crear el primer `tasks.json`; no autoriza `orch run
 
 | Ticket | Evidencia actual | Estado recomendado al sincronizar |
 | --- | --- | --- |
-| `01` | Gobernanza y artefactos legacy tratados; commit de baseline pendiente | Integración de orch validada; requiere GATE 1 |
+| `01` | Gobernanza y artefactos legacy tratados; baseline y SPEC aprobados | GATE 1 aprobado; ejecución documental controlada |
 | `02` | Workspace/Supabase parcial; falta reproducibilidad comprobada | Backlog |
 | `03` | CI existe, pero gates rotos/falsos verdes | Backlog prioritario |
 | `04` | SDK ausente | Backlog |

@@ -1,6 +1,6 @@
 # SPEC-LEADFLOW-01 — Baseline de gobernanza y seguridad del repositorio
 
-> Estado: **LISTO PARA GATE 1; NO APROBADO**
+> Estado: **APROBADO — GATE 1 concedido por el Product Owner**
 > Baseline: PRD/arquitectura v2
 > Tipo: documentación, trazabilidad y secret hygiene.
 
