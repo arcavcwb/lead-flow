@@ -1,6 +1,6 @@
 # SPEC-LEADFLOW-01 — Baseline de gobernanza y seguridad del repositorio
 
-> Estado: **BORRADOR; REQUIERE GATE 1**
+> Estado: **LISTO PARA GATE 1; NO APROBADO**
 > Baseline: PRD/arquitectura v2
 > Tipo: documentación, trazabilidad y secret hygiene.
 

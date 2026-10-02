@@ -1,6 +1,6 @@
 # Revisión de GATE 0 — Lead Flow
 
-> Estado: **APROBADO — baseline de decisiones; commit documental pendiente**
+> Estado: **APROBADO — baseline consolidada en `39f954e`**
 > Fecha de preparación: 2026-10-02
 > La aprobación fue confirmada por el Product Owner en la sesión del 2026-10-02. El SHA final debe registrarse cuando se consolide la baseline en un commit.
 
@@ -39,8 +39,8 @@ Aprobar o rechazar la baseline documental y las reglas de operación antes de cr
 - [x] El CSV potencialmente sensible fue retirado del workspace sin abrir su contenido y no está versionado.
 - [x] La migración local antigua fue retirada del workspace; LEADFLOW-05 nace desde un esquema limpio.
 - [x] El Product Owner confirmó las decisiones de producto, stack, Supabase, orch y roles de agentes.
-- [ ] El worktree será separado en cambios revisables antes del commit de baseline.
-- [ ] Se registrará el commit SHA exacto de la baseline aprobada.
+- [x] El worktree fue separado en cambios revisables antes del commit de baseline.
+- [x] Se registró el commit SHA exacto de la baseline aprobada.
 
 ## Registro de decisión
 
@@ -48,7 +48,7 @@ Aprobar o rechazar la baseline documental y las reglas de operación antes de cr
 Decisión: APROBADO PARA PREPARAR LA INTEGRACIÓN DE ORCH
 Persona: Product Owner
 Fecha: 2026-10-02
-Commit SHA revisado: <completar>
+Commit SHA revisado: 39f954e
 Alcance aprobado: Lead Flow, Preact, Supabase Free, orch, Gemini ejecutor, Codex revisor
 Exclusiones: producto, remoto, despliegue, WhatsApp real, SEO incidental
 Observaciones: diff de orch aprobado por el Product Owner; integración manual aplicada y validada sin ejecución de producto
