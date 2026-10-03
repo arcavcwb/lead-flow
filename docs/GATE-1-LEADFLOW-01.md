@@ -88,3 +88,15 @@ NEXT_ACTION: revisión Codex y decisión del Product Owner
 El gate quedó concedido únicamente para este ticket y este alcance. Las demás
 tareas permanecen sin autorización. El estado de `orch` puede pasar a ejecución
 controlada solo mediante `orch run --only LEADFLOW-01 --max-tasks 1 --no-push`.
+
+## Intento de ejecución y bloqueo actual
+
+El 2026-10-02 se intentó ejecutar tres veces únicamente este ticket, siempre con
+`--no-push`. No se produjeron cambios de producto, escrituras remotas, tokens ni
+costes. El prompt generado finalmente contiene el SPEC correcto, pero el
+adaptador `orch v0.16.0 → agy` invoca `agy --print` sin pasarle el argumento del
+prompt y la CLI responde `Error: empty prompt`. La tarea se devolvió a `todo`.
+
+Esto bloquea la ejecución del executor, no revoca el GATE 1. La siguiente acción
+es corregir o sustituir el adaptador de Antigravity y probarlo con una llamada
+mínima antes de volver a despachar la tarea.
