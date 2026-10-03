@@ -10,6 +10,10 @@ budgets_config: budgets.yaml
 budgets_preset: conservative
 typical_dispatch_tokens: 200000
 
+# SPEC files are kept under docs/ in this repository; task specRef values keep
+# their explicit docs/SPEC-... paths.
+spec_root: .
+
 report_findings:
   enabled: false
 
